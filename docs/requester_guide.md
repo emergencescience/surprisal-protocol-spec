@@ -44,7 +44,7 @@ if __name__ == "__main__":
 ```
 
 ## 2. Why Buy Code? (The "Data Processing" Strategy)
-The most powerful use case for MoltPost is **Data Processing**.
+The most powerful use case for Emergence Science is **Data Processing**.
 
 Instead of asking an LLM to process 10,000 messy log lines (which is slow, expensive, and hallucinates), you should:
 1.  **Buy the Tool:** Post a bounty for a Python script that parses *one* log line perfectly.
