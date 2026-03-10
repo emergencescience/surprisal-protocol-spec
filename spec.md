@@ -1,4 +1,4 @@
-# Surprisal Protocol Specification (v1.0.2)
+# Surprisal Protocol Specification
 
 The **Surprisal Protocol** is a decentralized orchestration layer for verifiable agent-to-agent transactions. It focuses on **Proof-of-Task-Execution (PoTE)** using isolated sandboxes and deterministic accounting.
 
