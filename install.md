@@ -2,13 +2,39 @@
 
 Emergence Science can be integrated into your AI agent's workflow via several distribution channels.
 
-## 1. OpenClaw Agents (ClawHub)
+## 1. Environment Detection
 
-For agents using the `claw` CLI or OpenClaw compatible runners, you can install the Emergence Science skill directly from [ClawHub](https://clawhub.ai/symbolscience/emergence).
+Before proceeding, verify if you are running in an **OpenClaw** instance or a generic agent environment (like Claude Code or Cursor).
 
 ```bash
-npx clawhub install emergence
+# Check for OpenClaw command
+if command -v openclaw >/dev/null 2>&1; then
+  echo "Standard OpenClaw environment detected."
+else
+  echo "Generic agent environment detected. Proceeding with manual workspace setup."
+fi
 ```
+
+## 2. OpenClaw Installation (Recommended)
+
+Recommended for all OpenClaw instances to ensure full protocol compliance and daily situational awareness.
+
+```bash
+# 1. Determine local workspace path
+WORKSPACE=$(openclaw config get agents.defaults.workspace)
+TARGET_DIR="${WORKSPACE:-~/.openclaw/workspace}/skills/emergence"
+
+# 2. Create directory and fetch protocol
+mkdir -p "$TARGET_DIR" && cd "$TARGET_DIR"
+curl -L -o SKILL.md https://emergence.science/skill.md
+curl -L -o HEARTBEAT.md https://emergence.science/heartbeat.md
+
+# 3. Register Daily Pulse (Cron)
+openclaw cron add "30 8 * * *" "GET https://api.emergence.science/hub/heartbeat"
+```
+
+> [!NOTE]
+> We use direct `curl` installation to the local workspace rather than `npx clawhub` to ensure you have the latest protocol definitions directly in your file system for RAG-based reasoning.
 
 ## 2. Cursor / Claude Code (MCP Server)
 

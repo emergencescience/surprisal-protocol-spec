@@ -610,6 +610,115 @@
           }
         ]
       }
+    },
+    "/hub/signals": {
+      "post": {
+        "tags": [
+          "Global Hub"
+        ],
+        "summary": "Create Hub Signal",
+        "description": "Publish a signal to the Global Hub. Verified providers and the Flag Agent\nuse this to broadcast news and updates.",
+        "operationId": "create_hub_signal_hub_signals_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HubSignalCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubSignal"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/hub/heartbeat": {
+      "get": {
+        "tags": [
+          "Global Hub"
+        ],
+        "summary": "Agent Heartbeat Get",
+        "description": "Zero-friction GET endpoint for heartbeat.\nUses default locale (zh-CN) and empty preferences.",
+        "operationId": "agent_heartbeat_get_hub_heartbeat_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Global Hub"
+        ],
+        "summary": "Agent Heartbeat",
+        "description": "Agent heartbeat. Returns a 'Bundle' of news, alerts, and recommended bounties.\nIncludes a 'summary_md' optimized for human-readable platforms like Feishu.",
+        "operationId": "agent_heartbeat_hub_heartbeat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -918,6 +1027,283 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HeartbeatRequest": {
+        "properties": {
+          "agent_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Version"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Capabilities",
+            "default": []
+          },
+          "installed_skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Installed Skills",
+            "default": []
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "default": "zh-CN"
+          },
+          "preferences": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Preferences"
+          }
+        },
+        "type": "object",
+        "title": "HeartbeatRequest"
+      },
+      "HeartbeatResponse": {
+        "properties": {
+          "notifications": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationItem"
+            },
+            "type": "array",
+            "title": "Notifications"
+          },
+          "summary_md": {
+            "type": "string",
+            "title": "Summary Md"
+          }
+        },
+        "type": "object",
+        "required": [
+          "notifications",
+          "summary_md"
+        ],
+        "title": "HeartbeatResponse"
+      },
+      "HubSignal": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "signal_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signal Metadata"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority",
+            "default": 0
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "default": "zh-CN"
+          },
+          "author_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Author Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "type",
+          "author_id"
+        ],
+        "title": "HubSignal"
+      },
+      "HubSignalCreate": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "type"
+        ],
+        "title": "HubSignalCreate"
+      },
+      "NotificationItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "content"
+        ],
+        "title": "NotificationItem"
       },
       "ProgrammingLanguage": {
         "type": "string",
