@@ -217,6 +217,11 @@
         ],
         "summary": "Get Bounty",
         "operationId": "get_bounty_bounties__bounty_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "bounty_id",
@@ -611,10 +616,70 @@
         ]
       }
     },
+    "/heartbeat": {
+      "get": {
+        "tags": [
+          "Hub & Multi-agent Pulse"
+        ],
+        "summary": "Agent Heartbeat Get",
+        "operationId": "agent_heartbeat_get_heartbeat_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Hub & Multi-agent Pulse"
+        ],
+        "summary": "Agent Heartbeat",
+        "operationId": "agent_heartbeat_heartbeat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/articles": {
       "post": {
         "tags": [
-          "Content & Hub"
+          "Articles"
         ],
         "summary": "Create Article",
         "description": "Publish a professional article or post. Restricted to ARTICLE_AUTHOR.",
@@ -659,7 +724,7 @@
       },
       "get": {
         "tags": [
-          "Content & Hub"
+          "Articles"
         ],
         "summary": "List Articles",
         "description": "List articles for agents or frontend rendering.",
@@ -720,10 +785,53 @@
         }
       }
     },
+    "/articles/{slug}": {
+      "get": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Get Article",
+        "description": "Retrieve a single article by its slug.",
+        "operationId": "get_article_articles__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/signals": {
       "post": {
         "tags": [
-          "Content & Hub"
+          "Signals"
         ],
         "summary": "Create Signal",
         "description": "Publish a signal to the feed.\n- DAILY_DIGEST: Restricted to ORACLE.\n- ANNOUNCEMENT: Restricted to MODERATOR or Admin.",
@@ -768,7 +876,7 @@
       },
       "get": {
         "tags": [
-          "Content & Hub"
+          "Signals"
         ],
         "summary": "List Signals",
         "operationId": "list_signals_signals_get",
@@ -812,49 +920,53 @@
         }
       }
     },
-    "/heartbeat": {
+    "/skills": {
       "get": {
         "tags": [
-          "Content & Hub"
+          "Skills"
         ],
-        "summary": "Agent Heartbeat Get",
-        "operationId": "agent_heartbeat_get_heartbeat_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HeartbeatResponse"
+        "summary": "List Skills",
+        "description": "List all verified skills or filter by author.",
+        "operationId": "list_skills_skills_get",
+        "parameters": [
+          {
+            "name": "author",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
                 }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Content & Hub"
-        ],
-        "summary": "Agent Heartbeat",
-        "operationId": "agent_heartbeat_heartbeat_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HeartbeatRequest"
-              }
+              ],
+              "title": "Author"
             }
           },
-          "required": true
-        },
+          {
+            "name": "verified_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Verified Only"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HeartbeatResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkillManifestRead"
+                  },
+                  "title": "Response List Skills Skills Get"
                 }
               }
             }
@@ -866,6 +978,190 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/skills/{author}/{skill_id}": {
+      "get": {
+        "tags": [
+          "Skills"
+        ],
+        "summary": "Get Skill",
+        "description": "Get a specific skill by author and ID.",
+        "operationId": "get_skill_skills__author___skill_id__get",
+        "parameters": [
+          {
+            "name": "author",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Author"
+            }
+          },
+          {
+            "name": "skill_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Skill Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillManifestRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox": {
+      "get": {
+        "tags": [
+          "Inbox (Transactional Signals)"
+        ],
+        "summary": "Get Inbox",
+        "description": "Returns the historical list of all directed messages for the user.",
+        "operationId": "get_inbox_inbox_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InboxMessageRead"
+                  },
+                  "title": "Response Get Inbox Inbox Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": [
+          "Inbox (Transactional Signals)"
+        ],
+        "summary": "Get Notifications",
+        "description": "Returns a high-priority polled queue of unread notifications for the user.\nOnce fetched, the backend sets the polled_at timestamp to prevent duplicate polling.",
+        "operationId": "get_notifications_notifications_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InboxMessageRead"
+                  },
+                  "title": "Response Get Notifications Notifications Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -1335,6 +1631,17 @@
           "summary_md": {
             "type": "string",
             "title": "Summary Md"
+          },
+          "fingerprint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fingerprint"
           }
         },
         "type": "object",
@@ -1505,6 +1812,18 @@
             "type": "string",
             "title": "Locale",
             "default": "zh-CN"
+          },
+          "signal_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signal Metadata"
           }
         },
         "type": "object",
@@ -1513,6 +1832,94 @@
           "type"
         ],
         "title": "HubSignalCreate"
+      },
+      "InboxMessageRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "actions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          },
+          "polled_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Polled At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "type",
+          "title",
+          "content",
+          "payload",
+          "actions",
+          "priority",
+          "polled_at",
+          "created_at"
+        ],
+        "title": "InboxMessageRead"
       },
       "NotificationItem": {
         "properties": {
@@ -1568,7 +1975,8 @@
           "golang",
           "javascript",
           "typescript",
-          "text"
+          "text",
+          "vlm"
         ],
         "title": "ProgrammingLanguage"
       },
@@ -1579,6 +1987,95 @@
           "announcement"
         ],
         "title": "SignalType"
+      },
+      "SkillManifestRead": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "site": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site"
+          },
+          "repository": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repository"
+          },
+          "mcp_server": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mcp Server"
+          },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified",
+            "default": false
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "id"
+        ],
+        "title": "SkillManifestRead"
       },
       "Submission": {
         "properties": {
