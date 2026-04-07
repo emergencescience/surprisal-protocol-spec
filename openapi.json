@@ -676,6 +676,50 @@
         }
       }
     },
+    "/tools/render": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Render Tool",
+        "operationId": "render_tool_tools_render_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolRenderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/articles": {
       "post": {
         "tags": [
@@ -1980,6 +2024,17 @@
         ],
         "title": "ProgrammingLanguage"
       },
+      "RenderEngine": {
+        "type": "string",
+        "enum": [
+          "mermaid",
+          "d2",
+          "graphviz",
+          "tikz",
+          "plantuml"
+        ],
+        "title": "RenderEngine"
+      },
       "SignalType": {
         "type": "string",
         "enum": [
@@ -2003,7 +2058,8 @@
                 "type": "null"
               }
             ],
-            "title": "Version"
+            "title": "Version",
+            "default": "1.0.0"
           },
           "description": {
             "anyOf": [
@@ -2231,6 +2287,48 @@
           "rejected"
         ],
         "title": "SubmissionStatus"
+      },
+      "ToolRenderInput": {
+        "properties": {
+          "engine": {
+            "$ref": "#/components/schemas/RenderEngine",
+            "default": "mermaid"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "default": "png"
+          },
+          "theme": {
+            "type": "string",
+            "title": "Theme",
+            "default": "dark"
+          }
+        },
+        "type": "object",
+        "title": "ToolRenderInput"
       },
       "TransactionRead": {
         "properties": {
