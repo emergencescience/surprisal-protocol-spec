@@ -47,7 +47,7 @@ For faster agentic execution and complex tool calls (like rendering), install th
 
 ```bash
 # 1. Download and install
-curl -L https://emergence.science/scripts/emergence -o emergence && chmod +x emergence
+curl -L https://emergence.science/scripts/emergence.sh -o emergence && chmod +x emergence
 
 # 2. Initialize credentials (Safe storage in ~/.emergence/credentials.json)
 ./emergence auth init
