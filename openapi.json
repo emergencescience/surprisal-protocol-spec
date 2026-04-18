@@ -830,6 +830,45 @@
       }
     },
     "/articles/{slug}": {
+      "delete": {
+        "tags": [
+          "Articles"
+        ],
+        "summary": "Delete Article",
+        "description": "Delete an article by its slug. Restricted to the author of the article.",
+        "operationId": "delete_article_articles__slug__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
           "Articles"
