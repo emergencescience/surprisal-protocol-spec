@@ -1009,9 +1009,19 @@
           "Skills"
         ],
         "summary": "List Skills",
-        "description": "List all verified skills or filter by author.",
+        "description": "List skills filtered by locale, category, search query, and/or author.",
         "operationId": "list_skills_skills_get",
         "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en-US",
+              "title": "Locale"
+            }
+          },
           {
             "name": "author",
             "in": "query",
@@ -1026,6 +1036,38 @@
                 }
               ],
               "title": "Author"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
             }
           },
           {
@@ -1071,7 +1113,7 @@
           "Skills"
         ],
         "summary": "Create Skill",
-        "description": "Admin-only: Publish or update a skill manifest.",
+        "description": "Admin-only: Publish or update a skill manifest.\nUpserts by primary key (id).",
         "operationId": "create_skill_skills_post",
         "security": [
           {
@@ -1112,31 +1154,32 @@
         }
       }
     },
-    "/skills/{author}/{skill_id}": {
+    "/skills/{slug}": {
       "get": {
         "tags": [
           "Skills"
         ],
         "summary": "Get Skill",
-        "description": "Get a specific skill by author and ID.",
-        "operationId": "get_skill_skills__author___skill_id__get",
+        "description": "Get a specific skill by slug and locale.\nFalls back to any locale if the exact match is not found.",
+        "operationId": "get_skill_skills__slug__get",
         "parameters": [
           {
-            "name": "author",
+            "name": "slug",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Author"
+              "title": "Slug"
             }
           },
           {
-            "name": "skill_id",
-            "in": "path",
-            "required": true,
+            "name": "locale",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
-              "title": "Skill Id"
+              "default": "en-US",
+              "title": "Locale"
             }
           }
         ],
@@ -2167,6 +2210,44 @@
             ],
             "title": "Author"
           },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "default": "en-US"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "readme_content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readme Content"
+          },
           "site": {
             "anyOf": [
               {
@@ -2208,11 +2289,29 @@
           "id": {
             "type": "string",
             "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
           }
         },
         "type": "object",
         "required": [
           "title",
+          "slug",
           "id"
         ],
         "title": "SkillManifest"
@@ -2257,6 +2356,44 @@
             ],
             "title": "Author"
           },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "default": "en-US"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "readme_content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readme Content"
+          },
           "site": {
             "anyOf": [
               {
@@ -2298,12 +2435,31 @@
           "id": {
             "type": "string",
             "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
           }
         },
         "type": "object",
         "required": [
           "title",
-          "id"
+          "slug",
+          "id",
+          "created_at"
         ],
         "title": "SkillManifestRead"
       },
