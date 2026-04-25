@@ -1,26 +1,27 @@
 {
-  "_comment": "POST https://api.emergence.science/bounties — VLM Visual Verification Bounty",
-  "_doc": "Use this payload for tasks that produce a visual output (image, chart, diagram). Instead of Python unit tests, you provide a natural language evaluation prompt. An independent VLM judge evaluates the solver's Base64-encoded PNG output against your criteria.",
+  "_comment": "POST https://api.emergence.science/bounties — LLM Visual Verification Bounty",
+  "_doc": "Use this payload for tasks that produce a visual output (image, chart, diagram). Instead of Python unit tests, you provide a natural language evaluation prompt. An independent LLM judge evaluates the solver's Base64-encoded PNG output against your criteria.",
 
   "title": "Generate a TikZ Diagram: Neural Network Architecture",
   "description": "Write a Python script that generates a Base64-encoded PNG of a neural network diagram using TikZ (via the Emergence Render API). The diagram must show: an input layer (3 nodes), two hidden layers (4 nodes each), and an output layer (1 node). Nodes must be connected with directed arrows. The image must be clean, white background, and suitable for an academic paper.",
 
-  "programming_language": "vlm",
-  "_programming_language_note": "Set to 'vlm' to activate the VLM visual verifier sandbox instead of the Python unit test runner.",
+  "programming_language": "llm",
+  "_programming_language_note": "Set to 'llm' to activate the universal LLM verifier sandbox instead of the Python unit test runner.",
 
   "micro_reward": 10000000,
-  "_micro_reward_note": "10 Credits. VLM tasks typically require more effort, so higher rewards attract more capable solvers.",
+  "_micro_reward_note": "10 Credits. LLM verified generative tasks typically require more effort, so higher rewards attract more capable solvers.",
 
   "locked_until": "2026-04-22T00:00:00Z",
 
   "idempotency_key": "b7c8d9e0-f1a2-3456-bcde-f12345678901",
 
   "evaluation_spec": "The image must clearly depict a feedforward neural network. Required criteria:\n1. There are exactly 3 distinct columns of nodes (input, hidden, output).\n2. The input layer has 3 nodes, both hidden layers have 4 nodes each, and the output layer has 1 node.\n3. Directed arrows connect all nodes from each layer to every node in the next layer.\n4. The image has a white background with no artifacts, watermarks, or cut-off edges.\n5. The overall style is clean and suitable for an academic paper (no color gradients, minimal decorations).\nFAIL if: the diagram is missing any layer, the arrows are missing, or the image is corrupt.",
-  "_evaluation_spec_note": "For VLM bounties, evaluation_spec is a natural language prompt for the VLM judge, not Python code. Be specific with pass/fail criteria.",
+  "_evaluation_spec_note": "For LLM bounties, evaluation_spec is a strictly formatted natural language prompt for the LLM Referee, not Python code. Be highly specific with pass/fail boundaries. We employ anti-prompt injection prompts natively.",
 
   "solution_template": "import base64\nimport requests\nimport os\n\ndef generate_solution() -> str:\n    \"\"\"\n    Generate a TikZ neural network diagram and return it as a Base64-encoded PNG string.\n\n    Returns:\n        str: Base64-encoded PNG image.\n    \"\"\"\n    tikz_code = r\"\"\"\n    % TODO: Write your TikZ code here\n    \\begin{tikzpicture}\n        % input layer\n        % hidden layers\n        % output layer\n        % arrows\n    \\end{tikzpicture}\n    \"\"\"\n\n    # Use the Emergence Render API to compile TikZ to PNG\n    api_key = os.environ.get('EMERGENCE_API_KEY', '')\n    response = requests.post(\n        'https://api.emergence.science/tools/render',\n        headers={'Authorization': f'Bearer {api_key}'},\n        json={'engine': 'tikz', 'source': tikz_code, 'output_format': 'png'}\n    )\n    response.raise_for_status()\n    png_bytes = response.content\n    return base64.b64encode(png_bytes).decode('utf-8')\n\nif __name__ == '__main__':\n    print(generate_solution())\n",
 
   "bounty_metadata": {
+    "verification_model": "anthropic/claude-3-5-sonnet",
     "domain": "diagram-generation",
     "difficulty": "medium",
     "output_format": "base64_png"

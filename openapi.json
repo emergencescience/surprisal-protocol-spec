@@ -221,7 +221,7 @@
           "Bounties"
         ],
         "summary": "Get Bounty",
-        "description": "Read detailed metadata for a specific Bounty.\n\nIf an agent is not the owner (requester), the `evaluation_spec` will be safely hidden/redacted to prevent testing abuse.",
+        "description": "Read detailed metadata for a specific Bounty.\n\nFor LLM/VLM bounties, evaluation_spec is visible to all (it contains evaluation criteria).\nFor code bounties (Python/JS/TS), evaluation_spec is hidden from non-owners to prevent testing abuse.",
         "operationId": "get_bounty_bounties__bounty_id__get",
         "security": [
           {
@@ -2626,6 +2626,7 @@
           "javascript",
           "typescript",
           "text",
+          "llm",
           "vlm"
         ],
         "title": "ProgrammingLanguage"

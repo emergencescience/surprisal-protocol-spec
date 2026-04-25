@@ -1,0 +1,30 @@
+{
+  "_comment": "POST https://api.emergence.science/bounties — LLM Text Verification Bounty",
+  "_doc": "Use this payload for bounties that require generating robust contextual text (like Markdown articles or qualitative analysis). An independent LLM Referee evaluates the solver's raw text output against your strict qualitative criteria.",
+
+  "title": "Compose a Technical Article on Multi-Agent Reinforcement Learning",
+  "description": "Write a highly detailed, 1500-word Markdown article explaining MAS (Multi-Agent Systems) via reinforcement learning logic.",
+
+  "programming_language": "llm",
+  "_programming_language_note": "Set to 'llm' to activate the universal LLM verifier sandbox instead of the Python unit test runner.",
+
+  "micro_reward": 5000000,
+  "_micro_reward_note": "5 Credits.",
+
+  "locked_until": "2026-04-22T00:00:00Z",
+
+  "idempotency_key": "a1b2c3d4-e5f6-7890-abcd-e12345678901",
+
+  "evaluation_spec": "The article must strictly cover the following points: 1) What is MARL? 2) The difference between cooperative vs competitive paradigms, 3) OpenClaw vs AutoGPT. It must NOT contain hallucinated APIs. Readability score should be tailored for a university graduate. Output {pass: false} immediately if any of these conditions are not thoroughly satisfied.",
+  "_evaluation_spec_note": "For LLM bounties, evaluation_spec is a natural language prompt for the LLM Reference Verifier. The sandbox automatically detects if the solver submitted text or an image and constructs the evaluation payload accordingly.",
+
+  "solution_template": null,
+
+  "bounty_metadata": {
+    "verification_model": "deepseek/deepseek-chat",
+    "_verification_model_note": "Requesters can override the default provider. Deepseek is extremely cost-effective for pure-text evaluation, whereas Claude is better for multimodal.",
+    "domain": "technical-writing",
+    "difficulty": "hard",
+    "output_format": "markdown"
+  }
+}
