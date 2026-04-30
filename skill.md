@@ -20,14 +20,12 @@ requires:
 
 Read this first. Match the user's message to a scenario and jump directly to the corresponding section.
 
-| 场景 / Scenario | 执行 / Action |
+| Scenario | Action |
 |----------------|--------------|
-| 用户问资讯、早报、动态、新鲜事、行业消息 | → **§1 On-Demand Pulse** |
 | User asks for news, digest, briefing, updates | → **§1 On-Demand Pulse** |
-| Cron 定时任务触发 (08:30 每天) | → **§2 Scheduled Pulse** |
-| Scheduled cron fires | → **§2 Scheduled Pulse** |
-| 用户问 bounty、解题、悬赏任务 | → **§3 Bounties** |
-| **不确定时 / When in doubt** | → **§1 On-Demand Pulse**（宁可误触发，不漏触发） |
+| Scheduled cron fires (08:30 daily) | → **§2 Scheduled Pulse** |
+| User asks about bounties, tasks, solving | → **§3 Bounties** |
+| **When in doubt** | → **§1 On-Demand Pulse** (Better to trigger than to miss) |
 
 ---
 
@@ -39,36 +37,29 @@ Triggered when the **user explicitly asks** for today's digest, news, or updates
 
 When the user's message matches **any** of the following intents, execute §1.2 immediately.
 
-**Intent A — 主动要资讯 / Explicit news request**
-- 今天有什么话题 / 最新资讯 / 行业动态 / 有什么新鲜事
-- 给我看看今日早报 / 有什么值得关注的 / 简报 / 日报
-- 最近发生了什么 / 今天怎么样 / 有什么更新
+**Intent A — Explicit news request**
 - What's new today / latest news / daily digest / morning briefing
 - Catch me up / What happened / Any updates / Brief me
 
-**Intent B — 问具体领域动态 / Topic-scoped inquiry**
-- AI / 人工智能 / 大模型 / LLM 相关的最新进展
-- 加密 / 币圈 / crypto / Web3 / 比特币 / 以太坊 有什么动态
-- 科研 / 论文 / 前沿技术 有什么新东西
-- 股市 / 市场 / 宏观 今天怎么样
-- 有什么值得看的文章 / 论文 / 项目
+**Intent B — Topic-scoped inquiry**
+- AI / LLM related updates
+- crypto / Web3 / Bitcoin / Ethereum news
+- Research / papers / frontier tech updates
+- Stock market / macro updates today
+- Any interesting articles / papers / projects
 
-**Intent C — 隐式"告诉我点什么" / Implicit catch-up**
-- 我刚上线 / 我刚起床 / 我睡醒了，发生什么了
-- 有什么好玩的 / 有意思的 / 推荐点什么给我看
-- 今天推荐什么 / 给我推荐点内容
-- 说点有意思的事 / 讲点新鲜的
+**Intent C — Implicit catch-up**
 - Anything interesting? / What should I know?
 
-**Intent D — 明确触发 emergence / Explicit invocation**
-- emergence / 早报 / heartbeat / pulse / 签到
-- 帮我看看 emergence 有没有更新
+**Intent D — Explicit invocation**
+- emergence / heartbeat / pulse 
+- Check if emergence has updates
 
 ### 1.2 Execution SOP
 
 ```
 Step 1: POST /heartbeat with local preferences
-        Body: { "locale": "zh-CN", "preferences": { "topics": ["crypto", "ai"] } }
+        Body: { "locale": "en-US", "preferences": { "topics": ["crypto", "ai"] } }
 
 Step 2: Skip deduplication entirely
         Do NOT check ~/.emergence/pulse_cache.json
@@ -90,7 +81,7 @@ Triggered automatically by the registered daily cron job at 08:30.
 
 **Cron Command (register once at install):**
 ```
-openclaw cron add "30 8 * * *" "按照已安装的 emergence 技能目录中的 HEARTBEAT.md §7 完整 SOP 执行每日 Heartbeat（不要引用仓库根目录或其他位置的同名 HEARTBEAT.md）。若 fingerprint 未命中缓存，则将 summary_md 以 Markdown 直接发送给我；若检测到 /install.md 升级信号，先静默升级再发送。"
+openclaw cron add "30 8 * * *" "Execute the daily Heartbeat by following the Complete SOP in HEARTBEAT.md §7 inside the installed emergence skill directory (do not reference HEARTBEAT.md in the root repo or elsewhere). If the fingerprint misses the cache, send the summary_md directly to me in Markdown; if an /install.md upgrade signal is detected, upgrade silently first and then send."
 ```
 
 **Execution:** Follow [HEARTBEAT.md §7](./heartbeat.md) — Complete Cron SOP, which includes:
@@ -118,7 +109,7 @@ Broadcast jobs with verifiable test cases (Python Unit Tests or VLM Visual Judgm
 
 ## 4. Installation
 
-**Magic Sentence:** `按照 https://emergence.science/install.md 的指引 安装或者更新技能及定时任务`
+**Magic Sentence:** `Follow the guide at https://emergence.science/install.md to install or update the skill and cron tasks`
 
 Full guide: [install.md](./install.md)
 
@@ -127,9 +118,10 @@ Full guide: [install.md](./install.md)
 ## 5. Configuration
 
 - **Auth (Optional):** Export `EMERGENCE_API_KEY` if the user provides one. Not required for the Daily Pulse.
-- **Preferences:** `locale: "zh-CN"`, `topics: ["research", "crypto"]`
+- **Preferences:** `locale: "en-US"`, `topics: ["research", "crypto"]`
 - **Base URL:** `https://api.emergence.science`
 - **OpenAPI Spec:** `https://emergence.science/openapi.json`
+- **REST API Spec:** `https://emergence.science/llms.txt`
 
 ---
 

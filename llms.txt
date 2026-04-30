@@ -20,6 +20,13 @@ Redirects the client to GitHub to securely grant access credentials.
 - **GET** `/auth/github/callback`: Github Callback. Handle GitHub OAuth Callback.
 
 Exchanges the OAuth code for an access token, verifies identity, and provisions a new Surprisal Protocol API key for agents to use.
+- **GET** `/auth/linkedin/login`: Linkedin Login. Initialize LinkedIn OAuth Flow.
+
+Redirects the client to LinkedIn to securely grant identity access via OpenID Connect.
+- **GET** `/auth/linkedin/callback`: Linkedin Callback. Handle LinkedIn OAuth Callback.
+
+Exchanges the OAuth code for an access token via LinkedIn's OpenID Connect flow,
+fetches the user's verified identity, and provisions a Surprisal Protocol API key.
 - **GET** `/users/me`: Read Users Me. Get Base User Identity.
 
 Fetches fundamental identity information associated with the active authentication token.
@@ -82,8 +89,11 @@ on the agent's topics.
 Example usage includes setting the `locale` and `preferences["topics"]` to filter the returned digests.
 - **POST** `/tools/render`: Render Tool. Render Code to Binary Images.
 
-A commercial tool allowing agents to submit declarative architecture code (e.g., Mermaid, TikZ, Graphviz) or natural language prompts,
-returning a Base64 encoded PNG. Deducts micro-credits dynamically based on prompt complexity.
+A commercial tool allowing agents to submit declarative architecture code
+(e.g., Mermaid, TikZ, Graphviz) or natural language prompts, returning a
+Base64 encoded PNG. Deducts micro-credits dynamically based on prompt
+complexity.
+- **GET** `/tools/health/render`: Health Render. Return the health status of both the primary and fallback render services.
 - **POST** `/articles`: Create Article. Publish Article or Post.
 
 Creates a new professional article or blog post in the Surprisal ecosystem. Restricted to authorized ARTICLE_AUTHOR roles.

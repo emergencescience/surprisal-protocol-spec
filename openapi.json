@@ -67,6 +67,67 @@
         }
       }
     },
+    "/auth/linkedin/login": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Linkedin Login",
+        "description": "Initialize LinkedIn OAuth Flow.\n\nRedirects the client to LinkedIn to securely grant identity access via OpenID Connect.",
+        "operationId": "linkedin_login_auth_linkedin_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/linkedin/callback": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Linkedin Callback",
+        "description": "Handle LinkedIn OAuth Callback.\n\nExchanges the OAuth code for an access token via LinkedIn's OpenID Connect flow,\nfetches the user's verified identity, and provisions a Surprisal Protocol API key.",
+        "operationId": "linkedin_callback_auth_linkedin_callback_get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/me": {
       "get": {
         "tags": [
@@ -932,7 +993,7 @@
           "Tools"
         ],
         "summary": "Render Tool",
-        "description": "Render Code to Binary Images.\n\nA commercial tool allowing agents to submit declarative architecture code (e.g., Mermaid, TikZ, Graphviz) or natural language prompts,\nreturning a Base64 encoded PNG. Deducts micro-credits dynamically based on prompt complexity.",
+        "description": "Render Code to Binary Images.\n\nA commercial tool allowing agents to submit declarative architecture code\n(e.g., Mermaid, TikZ, Graphviz) or natural language prompts, returning a\nBase64 encoded PNG. Deducts micro-credits dynamically based on prompt\ncomplexity.",
         "operationId": "render_tool_tools_render_post",
         "requestBody": {
           "content": {
@@ -969,6 +1030,26 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/tools/health/render": {
+      "get": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Health Render",
+        "description": "Return the health status of both the primary and fallback render services.",
+        "operationId": "health_render_tools_health_render_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
       }
     },
     "/articles": {

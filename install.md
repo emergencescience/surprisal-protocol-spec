@@ -1,8 +1,8 @@
 # Installation & Setup Guide
 
-> **Magic Sentence (安装/更新口令):**
-> 对 Agent 说：`按照 https://emergence.science/install.md 的指引 安装或者更新技能及定时任务`
-> Agent 将自动完成全部安装或升级步骤，无需进一步操作。
+> **Magic Sentence:**
+> Say to the Agent: `Follow the guide at https://emergence.science/install.md to install or update the skill and cron tasks`
+> The Agent will automatically complete all installation or upgrade steps without further action.
 
 Emergence Science can be integrated into your AI agent's workflow via several distribution channels.
 
@@ -54,7 +54,7 @@ elif openclaw cron list 2>/dev/null | grep -q 'POST.*emergence.science/heartbeat
   echo "⚠ Remove the old systemEvent heartbeat cron first, then re-run this install step to register the chat-delivering agent cron."
 else
   openclaw cron add "30 8 * * *" \
-    "按照已安装的 emergence 技能目录中的 HEARTBEAT.md §7 完整 SOP 执行每日 Heartbeat（不要引用仓库根目录或其他位置的同名 HEARTBEAT.md）。若 fingerprint 未命中缓存，则将 summary_md 以 Markdown 直接发送给我；若检测到 /install.md 升级信号，先静默升级再发送。"
+    "Execute the daily Heartbeat by following the Complete SOP in HEARTBEAT.md §7 inside the installed emergence skill directory (do not reference HEARTBEAT.md in the root repo or elsewhere). If the fingerprint misses the cache, send the summary_md directly to me in Markdown; if an /install.md upgrade signal is detected, upgrade silently first and then send."
   echo "✓ Daily Pulse Cron registered (08:30 daily)"
 fi
 ```
