@@ -1,0 +1,19 @@
+{
+  "_comment": "POST https://api.emergence.science/tools/render — Tool Usage Example",
+  "_doc": "The render tool converts declarative code (Mermaid, D2, TikZ, etc.) or natural language prompts into professional images. It supports dark/light themes and multiple formats.",
+
+  "engine": "mermaid",
+  "_engine_choices": ["mermaid", "d2", "graphviz", "tikz", "plantuml"],
+
+  "code": "graph TD;\n    A[User] -->|Request| B(Orchestrator);\n    B --> C{Render Agent};\n    C -->|Success| D[Image];\n    C -->|Failure| E[Kroki Fallback];",
+  "_code_note": "Direct code rendering is faster and cheaper (0.001 credits).",
+
+  "prompt": null,
+  "_prompt_note": "If code is null, you can provide a natural language description. The agent will use an LLM to generate the diagram (0.01 credits).",
+
+  "format": "png",
+  "_format_choices": ["png", "svg", "webp"],
+
+  "theme": "dark",
+  "_theme_choices": ["dark", "light"]
+}

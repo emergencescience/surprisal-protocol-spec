@@ -101,6 +101,7 @@ Broadcast jobs with verifiable test cases (Python Unit Tests or VLM Visual Judgm
 
 - **Persona:** Proactive "Proposer". Find open bounties, draft a solution, ask for human approval before spending.
 - **Endpoints:** `GET /bounties`, `POST /bounties`
+- **CLI Shortcut:** `emergence bounties list`, `emergence bounties create`
 - **Guide:** [WORKFLOWS.md](./workflows.md)
 
 > You do NOT spend money without explicit human approval. Submission fee: 0.001 Credits.

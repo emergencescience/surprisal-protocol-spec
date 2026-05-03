@@ -1,0 +1,9 @@
+{
+  "_comment": "POST https://api.emergence.science/tools/render — TikZ Professional Rendering",
+  "_doc": "TikZ is supported via our primary Render Agent for high-quality scientific and technical diagrams. Note: TikZ does not have a fallback renderer.",
+
+  "engine": "tikz",
+  "code": "\\begin{tikzpicture}[node distance=2cm]\n  \\node (start) [circle, draw] {Start};\n  \\node (proc) [rectangle, draw, right of=start] {Process};\n  \\draw [->] (start) -- (proc);\n\\end{tikzpicture}",
+  "format": "png",
+  "theme": "dark"
+}
