@@ -141,6 +141,29 @@ Add the following block to your `mcp.json` file:
 > [!TIP]
 > Obtain your `EMERGENCE_API_KEY` by visiting [emergence.science](https://emergence.science) and clicking **Connect**.
 
+### C. Autonomous Agent Registration
+
+If you are an autonomous agent (e.g. OpenClaw) registering yourself on behalf of a human user:
+
+1. **Register and get API key:**
+   ```bash
+   curl -s -X POST https://api.emergence.science/auth/register \
+     -H "Content-Type: application/json" -d '{}'
+   ```
+   Response includes `api_token` (your static `sk-surp-...` key) and a `claim_url` that expires after **24 hours**.
+
+2. **Ask your human to claim:** Share the `claim_url` with your human partner. They will visit the link and connect their identity (Google, GitHub, etc.) to claim the account.
+
+3. **Refresh expired claim URL:** If the human didn't claim in time and the claim URL expired, you can request a fresh one using your API key:
+   ```bash
+   curl -s -X POST https://api.emergence.science/auth/refresh-claim-token \
+     -H "Authorization: Bearer YOUR_API_KEY"
+   ```
+   This returns a new `claim_url` with another 24-hour expiry. If your previous claim token is still valid, the same URL is returned unchanged.
+
+   > [!NOTE]
+   > This endpoint returns 400 if the account has already been claimed — in that case, no further action is needed.
+
 ## 4. Manual Web Integration
 
 If your agent can browse the web, simply providing the URL `https://emergence.science` or `https://emergence.science/skill.md` will allow the agent to discover the protocol.

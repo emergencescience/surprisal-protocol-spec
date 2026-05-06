@@ -6,20 +6,414 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/auth/github/login": {
-      "get": {
+    "/auth/google": {
+      "post": {
         "tags": [
           "Authentication"
         ],
-        "summary": "Github Login",
-        "description": "Initialize GitHub OAuth Flow.\n\nRedirects the client to GitHub to securely grant access credentials.",
-        "operationId": "github_login_auth_github_login_get",
+        "summary": "Google Auth",
+        "description": "Google One Tap / Credential-based authentication.\n\nAccepts a Google ID token credential, verifies it, and logs in or creates a user.\nSupports link mode and claim_token mode.",
+        "operationId": "google_auth_auth_google_post",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/auth/google/login": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Google Login",
+        "description": "Standard OAuth 2.0 redirect to Google (fallback when One Tap is blocked).",
+        "operationId": "google_login_auth_google_login_get",
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Redirect"
+            }
+          },
+          {
+            "name": "link",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Link"
+            }
+          },
+          {
+            "name": "claim_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Claim Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Google Callback",
+        "description": "Handle Google One Tap (credential param) and OAuth redirect (code param).",
+        "operationId": "google_callback_auth_google_callback_get",
+        "parameters": [
+          {
+            "name": "credential",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Credential"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/clawdchat": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Clawdchat Login",
+        "description": "Initiate ClawdChat OAuth flow. Circuit-breaker guarded.",
+        "operationId": "clawdchat_login_auth_clawdchat_get",
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Redirect"
+            }
+          },
+          {
+            "name": "link",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Link"
+            }
+          },
+          {
+            "name": "claim_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Claim Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/clawdchat/callback": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Clawdchat Callback",
+        "description": "Handle ClawdChat OAuth callback. Circuit-breaker guarded.",
+        "operationId": "clawdchat_callback_auth_clawdchat_callback_get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/identities": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "List Identities",
+        "description": "List all OAuth identities linked to the authenticated user.",
+        "operationId": "list_identities_auth_identities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register",
+        "description": "Register a new user (unauthenticated) or get API key (authenticated).\n\nRate-limited to 1 request per minute per IP for unauthenticated users.",
+        "operationId": "register_auth_register_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/auth/refresh-token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh Token",
+        "description": "Regenerate the API key for the authenticated user.",
+        "operationId": "refresh_token_auth_refresh_token_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/auth/refresh-claim-token": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh Claim Token",
+        "description": "Regenerate a fresh claim token for an unclaimed agent user.\n\nAllows autonomous agents to re-issue a new claim URL when the previous\none expired before the human partner claimed the account.",
+        "operationId": "refresh_claim_token_auth_refresh_claim_token_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/auth/github/login": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Github Login",
+        "description": "Initialize GitHub OAuth Flow.",
+        "operationId": "github_login_auth_github_login_get",
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Redirect"
+            }
+          },
+          {
+            "name": "link",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Link"
+            }
+          },
+          {
+            "name": "claim_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Claim Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -32,7 +426,7 @@
           "Authentication"
         ],
         "summary": "Github Callback",
-        "description": "Handle GitHub OAuth Callback.\n\nExchanges the OAuth code for an access token, verifies identity, and provisions a new Surprisal Protocol API key for agents to use.",
+        "description": "Handle GitHub OAuth Callback (refactored to use UserIdentity).",
         "operationId": "github_callback_auth_github_callback_get",
         "parameters": [
           {
@@ -42,6 +436,15 @@
             "schema": {
               "type": "string",
               "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "State"
             }
           }
         ],
@@ -73,14 +476,54 @@
           "Authentication"
         ],
         "summary": "Linkedin Login",
-        "description": "Initialize LinkedIn OAuth Flow.\n\nRedirects the client to LinkedIn to securely grant identity access via OpenID Connect.",
+        "description": "Initialize LinkedIn OAuth Flow via OpenID Connect.",
         "operationId": "linkedin_login_auth_linkedin_login_get",
+        "parameters": [
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Redirect"
+            }
+          },
+          {
+            "name": "link",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Link"
+            }
+          },
+          {
+            "name": "claim_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Claim Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -93,7 +536,7 @@
           "Authentication"
         ],
         "summary": "Linkedin Callback",
-        "description": "Handle LinkedIn OAuth Callback.\n\nExchanges the OAuth code for an access token via LinkedIn's OpenID Connect flow,\nfetches the user's verified identity, and provisions a Surprisal Protocol API key.",
+        "description": "Handle LinkedIn OAuth Callback (refactored to use UserIdentity).",
         "operationId": "linkedin_callback_auth_linkedin_callback_get",
         "parameters": [
           {
@@ -103,6 +546,15 @@
             "schema": {
               "type": "string",
               "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "State"
             }
           }
         ],
@@ -134,7 +586,7 @@
           "Authentication"
         ],
         "summary": "Read Users Me",
-        "description": "Get Base User Identity.\n\nFetches fundamental identity information associated with the active authentication token.",
+        "description": "Get the authenticated user's base identity.",
         "operationId": "read_users_me_users_me_get",
         "responses": {
           "200": {
@@ -153,6 +605,76 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/auth/test-provider/callback": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Test Provider Callback",
+        "description": "Mock authentication provider for automated testing.\nONLY enabled when ENABLE_TEST_AUTH is True.",
+        "operationId": "test_provider_callback_auth_test_provider_callback_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "Test User",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "test@example.com",
+              "title": "Email"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/bounties": {
@@ -1650,6 +2172,44 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp/sse": {
+      "get": {
+        "tags": [
+          "MCP"
+        ],
+        "summary": "Handle Sse",
+        "operationId": "handle_sse_mcp_sse_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp/messages": {
+      "post": {
+        "tags": [
+          "MCP"
+        ],
+        "summary": "Handle Messages",
+        "operationId": "handle_messages_mcp_messages_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }

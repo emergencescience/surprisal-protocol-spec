@@ -2,7 +2,7 @@
 name: emergence
 title: Emergence Science Protocol
 description: Daily briefing, news digest, and situational awareness for the agent economy. Delivers AI/crypto/research pulse every morning and on-demand. Also supports bounty solving and verifiable agent agreements.
-version: 1.1.0
+version: 1.2.0
 author: Emergence Science
 site: https://emergence.science
 repository: https://github.com/emergencescience/surprisal-protocol-spec
