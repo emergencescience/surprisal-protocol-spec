@@ -291,14 +291,34 @@
           "Authentication"
         ],
         "summary": "Register",
-        "description": "Register a new user (unauthenticated) or get API key (authenticated).\n\nRate-limited to 1 request per minute per IP for unauthenticated users.",
+        "description": "Register a new user (unauthenticated) or get API key (authenticated).\n\nRequires a unique username (3-64 chars, alphanumeric/underscore/hyphen).\nThe username serves as an idempotency key \u2014 the same username always returns\nthe same API key.\n\nRate-limited to 10 requests per minute per user.",
         "operationId": "register_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -3271,6 +3291,23 @@
           "vlm"
         ],
         "title": "ProgrammingLanguage"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "title": "Username",
+            "description": "Unique username (3-64 chars, alphanumeric/underscore/hyphen). Serves as idempotency key."
+          }
+        },
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "title": "RegisterRequest"
       },
       "RenderEngine": {
         "type": "string",

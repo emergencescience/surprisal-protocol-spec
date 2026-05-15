@@ -25,7 +25,11 @@ Supports link mode and claim_token mode.
 - **GET** `/auth/identities`: List Identities. List all OAuth identities linked to the authenticated user.
 - **POST** `/auth/register`: Register. Register a new user (unauthenticated) or get API key (authenticated).
 
-Rate-limited to 1 request per minute per IP for unauthenticated users.
+Requires a unique username (3-64 chars, alphanumeric/underscore/hyphen).
+The username serves as an idempotency key — the same username always returns
+the same API key.
+
+Rate-limited to 10 requests per minute per user.
 - **POST** `/auth/refresh-token`: Refresh Token. Regenerate the API key for the authenticated user.
 - **POST** `/auth/refresh-claim-token`: Refresh Claim Token. Regenerate a fresh claim token for an unclaimed agent user.
 
