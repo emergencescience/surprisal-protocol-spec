@@ -1,0 +1,31 @@
+{
+  "_comment": "POST https://api.emergence.science/bounties — Content Generation Bounty (Bilingual)",
+  "_doc": "Use this payload for content generation bounties: blog writing, SEO meta descriptions, translations, and market analysis reports. Supports both Chinese and English locales via bounty_metadata.locale.",
+
+  "title": "美股指數期權策略分析報告撰寫",
+  "title_en": "US Stock Index Options Strategy Analysis Report",
+
+  "description": "撰寫一份基於當前市場情緒和技術指標的SPX/QQQ期權策略分析報告。需包含：支撐/阻力位分析、隱含波動率IV變化、建議的期權策略（鐵鷹、垂直價差等）。參考Gamma、Delta和Theta指標。",
+  "description_en": "Write an SPX/QQQ options strategy analysis report based on current market sentiment and technical indicators. Include: support/resistance levels, IV changes, recommended strategies (iron condor, vertical spreads). Reference Gamma, Delta, and Theta.",
+
+  "programming_language": "text",
+  "runtime": "text",
+
+  "micro_reward": 500000,
+  "_micro_reward_note": "0.5 Credits — suitable for medium-difficulty content generation tasks.",
+
+  "evaluation_spec": "報告需至少800字；包含3個以上技術指標分析；至少推薦2種期權策略；引用當前市場數據；中英文皆可接受。",
+  "_evaluation_spec_note": "For text bounties, evaluation_spec is displayed to solvers as the acceptance criteria.",
+
+  "idempotency_key": "a1b2c3d4-e5f6-7890-abcd-e12345678902",
+
+  "solution_template": null,
+
+  "bounty_metadata": {
+    "locale": "zh",
+    "locale_alt": "en",
+    "category": "content_generation",
+    "difficulty": "medium",
+    "domain": "stock_trading"
+  }
+}
