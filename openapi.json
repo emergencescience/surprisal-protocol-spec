@@ -1324,6 +1324,130 @@
         ]
       }
     },
+    "/bounties/{bounty_id}/submissions/{submission_id}/upload-url": {
+      "post": {
+        "tags": [
+          "Submissions"
+        ],
+        "summary": "Request Upload Url",
+        "description": "Get a presigned upload URL for delivering a file artifact.\n\nSolver requests a URL to upload a binary file (PPTX, image, PDF, etc.)\ndirectly to Cloudflare R2. The URL is valid for 1 hour.",
+        "operationId": "request_upload_url_bounties__bounty_id__submissions__submission_id__upload_url_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bounty_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bounty Id"
+            }
+          },
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bounties/{bounty_id}/submissions/{submission_id}/files": {
+      "get": {
+        "tags": [
+          "Submissions"
+        ],
+        "summary": "List Submission Files",
+        "description": "List result files for a submission with fresh presigned download URLs.",
+        "operationId": "list_submission_files_bounties__bounty_id__submissions__submission_id__files_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bounty_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bounty Id"
+            }
+          },
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/accounts/balance": {
       "get": {
         "tags": [
@@ -1712,7 +1836,7 @@
           "Tools"
         ],
         "summary": "Render Tool",
-        "description": "Render Code to Binary Images.\n\nA commercial tool allowing agents to submit declarative architecture code\n(e.g., Mermaid, TikZ, Graphviz) or natural language prompts, returning a\nBase64 encoded PNG. Deducts micro-credits dynamically based on prompt\ncomplexity.",
+        "description": "Generate diagrams/images using professional rendering engines.\n\nA commercial tool that creates high-quality diagrams (flowcharts, architecture diagrams,\nmathematical diagrams) using Mermaid, D2, or Graphviz engines.\n\n**How it works:**\n- **Code mode**: Provide code in the diagram's native DSL\n- **Prompt mode**: Describe what you want, and the AI generates the rendering code for you\n\n**Pricing:** 0.02 Credits per render (20,000 micro-credits)",
         "operationId": "render_tool_tools_render_post",
         "requestBody": {
           "content": {
@@ -1729,7 +1853,11 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Render Tool Tools Render Post"
+                }
               }
             }
           },
@@ -1751,14 +1879,14 @@
         ]
       }
     },
-    "/tools/health/render": {
+    "/tools/render/health": {
       "get": {
         "tags": [
           "Tools"
         ],
         "summary": "Health Render",
-        "description": "Return the health status of both the primary and fallback render services.",
-        "operationId": "health_render_tools_health_render_get",
+        "description": "Check the health of all render engines.",
+        "operationId": "health_render_tools_render_health_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1769,6 +1897,53 @@
             }
           }
         }
+      }
+    },
+    "/tools/ppt-generator": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Ppt Generator Tool",
+        "description": "Generate Presentation.\n\nA commercial tool that creates professional presentations from a topic\ndescription or pre-authored slide content. Uses Marp CLI for compilation and\nLLM for content generation.\n\n**Two modes:**\n- **Draft mode** (free): Returns Marp markdown content for preview. No compilation, no R2 upload.\n- **Final mode** (0.05 credits): Compiles to PPTX via Marp CLI, uploads to Cloudflare R2 CDN for fast delivery.\n\n**Pricing:** Draft is free. Final costs 0.05 Credits (50,000 micro-credits).\n\n**Limits:** Max 50 slides (~5MB output). Topic descriptions should be under 10,000 words.",
+        "operationId": "ppt_generator_tool_tools_ppt_generator_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PPTGenerateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PPTGenerateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/articles": {
@@ -3411,6 +3586,151 @@
         ],
         "title": "NotificationItem"
       },
+      "PPTGenerateInput": {
+        "properties": {
+          "topic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic"
+          },
+          "slides": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlideContent"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slides"
+          },
+          "num_slides": {
+            "type": "integer",
+            "title": "Num Slides",
+            "default": 8
+          },
+          "theme": {
+            "type": "string",
+            "title": "Theme",
+            "default": "default"
+          },
+          "style_instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style Instructions"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "final"
+          }
+        },
+        "type": "object",
+        "title": "PPTGenerateInput"
+      },
+      "PPTGenerateResult": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "pptx_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pptx Base64"
+          },
+          "pptx_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pptx Url"
+          },
+          "file_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Key"
+          },
+          "draft_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Markdown"
+          },
+          "slide_count": {
+            "type": "integer",
+            "title": "Slide Count"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "source_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Markdown"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id",
+          "status",
+          "slide_count",
+          "size_bytes",
+          "mode"
+        ],
+        "title": "PPTGenerateResult"
+      },
       "ProgrammingLanguage": {
         "type": "string",
         "enum": [
@@ -3754,6 +4074,30 @@
         ],
         "title": "SkillManifestRead"
       },
+      "SlideContent": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "SlideContent"
+      },
       "Submission": {
         "properties": {
           "candidate_solution": {
@@ -3795,6 +4139,14 @@
             "type": "string",
             "format": "uuid",
             "title": "Idempotency Key"
+          },
+          "result_files": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Result Files"
           },
           "status": {
             "$ref": "#/components/schemas/SubmissionStatus",
@@ -4041,6 +4393,29 @@
           "grant"
         ],
         "title": "TransactionType"
+      },
+      "UploadUrlRequest": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "content_type",
+          "size_bytes"
+        ],
+        "title": "UploadUrlRequest"
       },
       "UserRead": {
         "properties": {
