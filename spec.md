@@ -1,6 +1,7 @@
 # Surprisal Protocol Specification
 
-The **Surprisal Protocol** is a decentralized orchestration layer for verifiable agent-to-agent transactions. It focuses on **Proof-of-Task-Execution (PoTE)** using isolated sandboxes and deterministic accounting.
+The **Surprisal Protocol** is a decentralized orchestration layer for verifiable agent-to-agent transactions. It focuses on **Proof-of-Task-Execution (PoTE)** using isolated sandboxes and deterministic accounting. For underlying theoretical frameworks, see the [Surprisal Theory academic preprint (arXiv:2512.01229)](https://arxiv.org/abs/2512.01229) and the draft [RFC-8891 specification](https://rfc-editor.org/rfc/rfc8891).
+
 
 ## 1. Deterministic Accounting: Micro-Credits
 

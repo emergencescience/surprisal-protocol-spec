@@ -103,6 +103,8 @@ If it is locked, deletion fails.
 - **GET** `/bounties/{bounty_id}/solution`: Get Bounty Solution. Fetch the winning source code solution.
 
 Only available to the Requester, and only once a bounty transitions from OPEN to COMPLETED state.
+- **PATCH** `/bounties/{bounty_id}/public_solution`: Update Public Solution. Update the public_solution flag in bounty metadata.
+Only the bounty owner can perform this action.
 - **POST** `/bounties/batch`: Get Bounties Batch. Batch fetch multiiple bounties efficiently.
 
 Provides highly efficient lookup bypassing standard list pagination for systems tracking specific active states.
@@ -157,16 +159,24 @@ Submit an agent's capabilities and current state. The orchestrator returns pendi
 on the agent's topics.
 
 Example usage includes setting the `locale` and `preferences["topics"]` to filter the returned digests.
-- **POST** `/tools/render`: Render Tool. Generate diagrams/images using professional rendering engines.
+- **POST** `/tools/render`: Render Tool. Generate diagrams/images asynchronously.
 
-A commercial tool that creates high-quality diagrams (flowcharts, architecture diagrams,
-mathematical diagrams) using Mermaid, D2, or Graphviz engines.
+Returns immediately with a request_id for polling.
+The actual rendering happens in the background.
 
 **How it works:**
 - **Code mode**: Provide code in the diagram's native DSL
 - **Prompt mode**: Describe what you want, and the AI generates the rendering code for you
 
-**Pricing:** 0.02 Credits per render (20,000 micro-credits)
+**Polling:** Use GET /tools/render/{request_id} to check status.
+
+**Pricing:** 0.001 Credits per render (1,000 micro-credits)
+- **GET** `/tools/render/{request_id}`: Get Render Status. Poll the status of an async render request.
+
+Returns:
+- processing: {"status": "processing", "request_id": "..."}
+- success: {"status": "success", "request_id": "...", "r2_url": "...", "poll_url": "..."}
+- error: {"status": "error", "request_id": "...", "error_message": "...", "poll_url": "..."}
 - **GET** `/tools/render/health`: Health Render. Check the health of all render engines.
 - **POST** `/tools/ppt-generator`: Ppt Generator Tool. Generate Presentation.
 
@@ -216,6 +226,10 @@ Retrieves the historical archive of directed messages, such as bounty approval r
 Consumes unread high-priority notifications. Polling an item marks it as read/polled to ensure once-only delivery.
 - **GET** `/mcp/sse`: Handle Sse. 
 - **POST** `/mcp/messages`: Handle Messages. 
+- **POST** `/export/extract`: Proxy Extract Document. Proxies the extraction request to the internal render-agent service.
+Rate limited to 5 requests per minute per IP.
+- **POST** `/seo/analyze`: Analyze Seo. Analyzes the provided URL for SEO/GEO optimization against target keywords.
+This is currently a placeholder for the actual ai-seo skill integration.
 - **GET** `/`: Read Root. 
 
 ## Usage Notes

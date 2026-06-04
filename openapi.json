@@ -767,7 +767,7 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 10,
+              "default": 50,
               "title": "Limit"
             }
           },
@@ -1004,6 +1004,63 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bounties/{bounty_id}/public_solution": {
+      "patch": {
+        "tags": [
+          "Bounties"
+        ],
+        "summary": "Update Public Solution",
+        "description": "Update the public_solution flag in bounty metadata.\nOnly the bounty owner can perform this action.",
+        "operationId": "update_public_solution_bounties__bounty_id__public_solution_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bounty_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bounty Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicSolutionUpdate"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1836,7 +1893,7 @@
           "Tools"
         ],
         "summary": "Render Tool",
-        "description": "Generate diagrams/images using professional rendering engines.\n\nA commercial tool that creates high-quality diagrams (flowcharts, architecture diagrams,\nmathematical diagrams) using Mermaid, D2, or Graphviz engines.\n\n**How it works:**\n- **Code mode**: Provide code in the diagram's native DSL\n- **Prompt mode**: Describe what you want, and the AI generates the rendering code for you\n\n**Pricing:** 0.02 Credits per render (20,000 micro-credits)",
+        "description": "Generate diagrams/images asynchronously.\n\nReturns immediately with a request_id for polling.\nThe actual rendering happens in the background.\n\n**How it works:**\n- **Code mode**: Provide code in the diagram's native DSL\n- **Prompt mode**: Describe what you want, and the AI generates the rendering code for you\n\n**Polling:** Use GET /tools/render/{request_id} to check status.\n\n**Pricing:** 0.001 Credits per render (1,000 micro-credits)",
         "operationId": "render_tool_tools_render_post",
         "requestBody": {
           "content": {
@@ -1877,6 +1934,57 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/tools/render/{request_id}": {
+      "get": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Get Render Status",
+        "description": "Poll the status of an async render request.\n\nReturns:\n- processing: {\"status\": \"processing\", \"request_id\": \"...\"}\n- success: {\"status\": \"success\", \"request_id\": \"...\", \"r2_url\": \"...\", \"poll_url\": \"...\"}\n- error: {\"status\": \"error\", \"request_id\": \"...\", \"error_message\": \"...\", \"poll_url\": \"...\"}",
+        "operationId": "get_render_status_tools_render__request_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Render Status Tools Render  Request Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/tools/render/health": {
@@ -2588,6 +2696,96 @@
         }
       }
     },
+    "/export/extract": {
+      "post": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Proxy Extract Document",
+        "description": "Proxies the extraction request to the internal render-agent service.\nRate limited to 5 requests per minute per IP.",
+        "operationId": "proxy_extract_document_export_extract_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_proxy_extract_document_export_extract_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/seo/analyze": {
+      "post": {
+        "tags": [
+          "seo"
+        ],
+        "summary": "Analyze Seo",
+        "description": "Analyzes the provided URL for SEO/GEO optimization against target keywords.\nThis is currently a placeholder for the actual ai-seo skill integration.",
+        "operationId": "analyze_seo_seo_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoAnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/": {
       "get": {
         "summary": "Read Root",
@@ -2933,6 +3131,25 @@
           "post"
         ],
         "title": "ArticleType"
+      },
+      "Body_proxy_extract_document_export_extract_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          },
+          "output_format": {
+            "type": "string",
+            "title": "Output Format",
+            "default": "json"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_proxy_extract_document_export_extract_post"
       },
       "BountyCommentCreate": {
         "properties": {
@@ -3745,6 +3962,19 @@
         ],
         "title": "ProgrammingLanguage"
       },
+      "PublicSolutionUpdate": {
+        "properties": {
+          "public_solution": {
+            "type": "boolean",
+            "title": "Public Solution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "public_solution"
+        ],
+        "title": "PublicSolutionUpdate"
+      },
       "RegisterRequest": {
         "properties": {
           "username": {
@@ -3772,6 +4002,27 @@
           "plantuml"
         ],
         "title": "RenderEngine"
+      },
+      "SeoAnalyzeRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "keywords"
+        ],
+        "title": "SeoAnalyzeRequest"
       },
       "SignalType": {
         "type": "string",
