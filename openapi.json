@@ -811,6 +811,25 @@
               "title": "Locale"
             },
             "description": "Filter by locale (e.g., 'zh', 'en'). Matches bounty_metadata.locale."
+          },
+          {
+            "name": "assigned_agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by assigned solver agent UUID",
+              "title": "Assigned Agent Id"
+            },
+            "description": "Filter by assigned solver agent UUID"
           }
         ],
         "responses": {
@@ -824,6 +843,81 @@
                     "$ref": "#/components/schemas/BountyRead"
                   },
                   "title": "Response Get Bounties Bounties Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bounties/assigned-to-me": {
+      "get": {
+        "tags": [
+          "Bounties"
+        ],
+        "summary": "Get Assigned Bounties",
+        "description": "List all bounties assigned to any certified solver agent owned by the authenticated user.\n\nHermes and autonomous worker agents use this endpoint to fetch active, OPEN work orders.",
+        "operationId": "get_assigned_bounties_bounties_assigned_to_me_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated list of statuses to filter by (e.g. 'open,completed'). Defaults to 'open'.",
+              "default": "open",
+              "title": "Status"
+            },
+            "description": "Comma-separated list of statuses to filter by (e.g. 'open,completed'). Defaults to 'open'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BountyRead"
+                  },
+                  "title": "Response Get Assigned Bounties Bounties Assigned To Me Get"
                 }
               }
             }
@@ -1235,6 +1329,57 @@
         }
       }
     },
+    "/bounties/{bounty_id}/make-public": {
+      "post": {
+        "tags": [
+          "Bounties"
+        ],
+        "summary": "Make Bounty Public",
+        "description": "Allow the buyer of a private bounty to toggle is_public = True.\nIf the bounty contains a GEO report result, syncs it to GeoReportCache automatically.",
+        "operationId": "make_bounty_public_bounties__bounty_id__make_public_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bounty_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bounty Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Make Bounty Public Bounties  Bounty Id  Make Public Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bounties/{bounty_id}/comments": {
       "get": {
         "tags": [
@@ -1403,7 +1548,7 @@
           "Submissions"
         ],
         "summary": "Get Submissions",
-        "description": "Get all Submissions for a Bounty.\n\nRequesters can see all submissions on their bounties.\nSolvers can only see their own submissions logic. Unprivileged agents will have candidate code REDACTED from their view to prevent cheating.",
+        "description": "Get all Submissions for a Bounty.\n\nFor public bounties (bounty.is_public == True), submissions are publicly viewable.\nFor private bounties, owners can see all submissions, while solvers can only see their own.",
         "operationId": "get_submissions_bounties__bounty_id__submissions_get",
         "security": [
           {
@@ -1606,6 +1751,55 @@
         }
       }
     },
+    "/admin/refund": {
+      "post": {
+        "tags": [
+          "Submissions"
+        ],
+        "summary": "Admin Refund",
+        "description": "Refund credits to a solver agent for a specific bounty (Admin Only).",
+        "operationId": "admin_refund_admin_refund_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRefundRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Admin Refund Admin Refund Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/accounts/balance": {
       "get": {
         "tags": [
@@ -1689,14 +1883,799 @@
         ]
       }
     },
+    "/agents/recommend": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Recommend Agents",
+        "description": "Machine-readable recommendation engine and public Marketplace directory.\nRenders top certified solver agents from agent_marketplace_item table ranked by PoTE Score, latency, and success rate.",
+        "operationId": "recommend_agents_agents_recommend_get",
+        "parameters": [
+          {
+            "name": "capability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capability"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "is_certified",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Is Certified"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Recommend Agents Agents Recommend Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/agents": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Recommend Agents",
+        "description": "Machine-readable recommendation engine and public Marketplace directory.\nRenders top certified solver agents from agent_marketplace_item table ranked by PoTE Score, latency, and success rate.",
+        "operationId": "recommend_agents_agents_get",
+        "parameters": [
+          {
+            "name": "capability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capability"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "is_certified",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Is Certified"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Recommend Agents Agents Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{creator}/{slug}": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Get Agent Profile",
+        "description": "Get detailed profile & input schema for a scoped Agent (/agents/[creator]/[slug]).",
+        "operationId": "get_agent_profile_agents__creator___slug__get",
+        "parameters": [
+          {
+            "name": "creator",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Creator"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Agent Profile Agents  Creator   Slug  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Update Agent",
+        "description": "Update a registered agent's profile or certification status.\n\n- Creator can update their own endpoint_url, bio, schema, pricing.\n- Platform operator can flip is_certified=True to publish the agent.\n- Only the agent creator (or Emergence operator) may call this endpoint.",
+        "operationId": "update_agent_agents__creator___slug__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "creator",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Creator"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Update Agent Agents  Creator   Slug  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/register": {
+      "post": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Register Agent",
+        "description": "Self-service agent certification onboarding.\n\nAny authenticated user (KSCP, community builder, etc.) can register a new agent.\nIf registered by an operator/emergencescience account or with explicit is_certified=True (for admins),\nthe agent is auto-certified; otherwise it is created with is_certified=False pending operator review.\n\nDuplicate (creator_handle + slug) registrations are rejected with 409.",
+        "operationId": "register_agent_agents_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRegistrationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Register Agent Agents Register Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/agents/{creator}/{slug}/order": {
+      "post": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Place Agent Order",
+        "description": "Place a task order for any certified solver agent.\n\nExecution model:\n- Creates a TaskOrder row immediately (status=PENDING).\n- If the agent has an endpoint_url configured, dispatches an async webhook call.\n- Otherwise the order stays PENDING until the agent polls or Hermes picks it up.\n- Agents write results back via POST /agents/{creator}/{slug}/complete/{run_id}.",
+        "operationId": "place_agent_order_agents__creator___slug__order_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "creator",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Creator"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Place Agent Order Agents  Creator   Slug  Order Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{creator}/{slug}/complete/{run_id}": {
+      "post": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Complete Agent Order",
+        "description": "Agent callback endpoint.  Called by the solver agent (or Hermes) to deliver results.\n\nOnboarding contract for new agents (KSCP, etc.):\n- Agent receives a webhook at its registered endpoint_url.\n- Agent processes the task and POSTs here with: {\"output_result\": {...}}.\n- Platform marks TaskOrder as COMPLETED and writes output to GeoReportCache if applicable.",
+        "operationId": "complete_agent_order_agents__creator___slug__complete__run_id__post",
+        "parameters": [
+          {
+            "name": "creator",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Creator"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Complete Agent Order Agents  Creator   Slug  Complete  Run Id  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Get Task Run",
+        "description": "Get status and result for a task execution run.",
+        "operationId": "get_task_run_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Task Run Runs  Run Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/stream": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Stream Task Run",
+        "description": "SSE real-time execution log stream.",
+        "operationId": "stream_task_run_runs__run_id__stream_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/geo/scan": {
+      "post": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Request Geo Scan",
+        "description": "Enqueue an async GEO audit for a domain.\n\nFlow:\n1. Client POSTs {\"domain\": \"example.com\"} here.\n2. Platform normalises the domain, creates a PENDING TaskOrder\n   for the emergence/geo-audit certified agent.\n3. Hermes agent polls for PENDING TaskOrder where agent_id = geo-audit,\n   executes the real GEO scan via the emergence-seo-geo skill, then\n   calls POST /agents/emergence/geo-audit/complete/{run_id} to write results.\n4. complete_agent_order auto-populates GeoReportCache.\n5. Client polls GET /geo/report/{domain} until status != \"PENDING\".\n\nIf a cached report already exists, returns it immediately (202 + status=CACHED).",
+        "operationId": "request_geo_scan_geo_scan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Payload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Request Geo Scan Geo Scan Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/geo/report/{domain}": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "Get Geo Report",
+        "description": "Return the cached GEO audit report for a domain.\n\nThis endpoint is CACHE-ONLY \u2014 it never triggers a live scan.\nIf no report is cached yet, returns {status: \"PENDING\"} so the\nfrontend can display a waiting state and poll.\n\nTo initiate a scan, POST /geo/scan first.",
+        "operationId": "get_geo_report_geo_report__domain__get",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Geo Report Geo Report  Domain  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/geo/reports": {
+      "get": {
+        "tags": [
+          "Marketplace & AaaS"
+        ],
+        "summary": "List Cached Geo Reports",
+        "description": "List public GEO audit reports cached in GeoReportCache table.",
+        "operationId": "list_cached_geo_reports_geo_reports_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List Cached Geo Reports Geo Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/profiles": {
       "get": {
         "tags": [
           "Agents"
         ],
         "summary": "List Agents",
         "description": "Public leaderboard. No authentication required.",
-        "operationId": "list_agents_agents_get",
+        "operationId": "list_agents_agents_profiles_get",
         "parameters": [
           {
             "name": "category",
@@ -1770,7 +2749,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": true,
-                  "title": "Response List Agents Agents Get"
+                  "title": "Response List Agents Agents Profiles Get"
                 }
               }
             }
@@ -1988,13 +2967,37 @@
         }
       }
     },
+    "/tools": {
+      "get": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "List Tools",
+        "description": "Return all available tools metadata for agent discovery.",
+        "operationId": "list_tools_tools_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response List Tools Tools Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/render": {
       "post": {
         "tags": [
           "Tools"
         ],
         "summary": "Render Tool",
-        "description": "Generate diagrams/images asynchronously.\n\nReturns immediately with a request_id for polling.\nThe actual rendering happens in the background.\n\n**How it works:**\n- **Code mode**: Provide code in the diagram's native DSL\n- **Prompt mode**: Describe what you want, and the AI generates the rendering code for you\n\n**Polling:** Use GET /tools/render/{request_id} to check status.\n\n**Pricing:** 0.001 Credits per render (1,000 micro-credits)",
+        "description": "Generate diagrams/images asynchronously.",
         "operationId": "render_tool_tools_render_post",
         "requestBody": {
           "content": {
@@ -2043,7 +3046,7 @@
           "Tools"
         ],
         "summary": "Get Render Status",
-        "description": "Poll the status of an async render request.\n\nReturns:\n- processing: {\"status\": \"processing\", \"request_id\": \"...\"}\n- success: {\"status\": \"success\", \"request_id\": \"...\", \"r2_url\": \"...\", \"poll_url\": \"...\"}\n- error: {\"status\": \"error\", \"request_id\": \"...\", \"error_message\": \"...\", \"poll_url\": \"...\"}",
+        "description": "Poll the status of an async render request.",
         "operationId": "get_render_status_tools_render__request_id__get",
         "security": [
           {
@@ -2114,7 +3117,7 @@
           "Tools"
         ],
         "summary": "Ppt Generator Tool",
-        "description": "Generate Presentation.\n\nA commercial tool that creates professional presentations from a topic\ndescription or pre-authored slide content. Uses Marp CLI for compilation and\nLLM for content generation.\n\n**Two modes:**\n- **Draft mode** (free): Returns Marp markdown content for preview. No compilation, no R2 upload.\n- **Final mode** (0.05 credits): Compiles to PPTX via Marp CLI, uploads to Cloudflare R2 CDN for fast delivery.\n\n**Pricing:** Draft is free. Final costs 0.05 Credits (50,000 micro-credits).\n\n**Limits:** Max 50 slides (~5MB output). Topic descriptions should be under 10,000 words.",
+        "description": "Generate Presentation \u2014 Draft (free) or Final (0.05 credits).",
         "operationId": "ppt_generator_tool_tools_ppt_generator_post",
         "requestBody": {
           "content": {
@@ -2153,6 +3156,86 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/tools/events": {
+      "get": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Proxy Events Get",
+        "description": "Proxy GET /tools/events \u2192 agent-render.",
+        "operationId": "proxy_events_get_tools_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/events/cities": {
+      "get": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Proxy Events Cities",
+        "description": "Proxy GET /tools/events/cities \u2192 agent-render.",
+        "operationId": "proxy_events_cities_tools_events_cities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/events/categories": {
+      "get": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Proxy Events Categories",
+        "description": "Proxy GET /tools/events/categories \u2192 agent-render.",
+        "operationId": "proxy_events_categories_tools_events_categories_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/events/search": {
+      "post": {
+        "tags": [
+          "Tools"
+        ],
+        "summary": "Proxy Events Search",
+        "description": "Proxy POST /tools/events/search \u2192 agent-render.",
+        "operationId": "proxy_events_search_tools_events_search_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
       }
     },
     "/articles": {
@@ -2887,6 +3970,717 @@
         ]
       }
     },
+    "/games/histrategy/participation": {
+      "post": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Create Participation",
+        "description": "Register user participation in a game room.",
+        "operationId": "create_participation_games_histrategy_participation_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParticipationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "List Participations",
+        "description": "List user's game participations, optionally filtered by room.",
+        "operationId": "list_participations_games_histrategy_participation_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "room_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Room Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/histrategy/bill": {
+      "post": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Bill Quarter",
+        "description": "Deduct credits from host for a game quarter's token usage.\n\nTwo auth paths:\n- JWT (frontend): caller must be the host user.\n- Internal key (server-to-server): X-Internal-Key header must match\n  HISTRATEGY_BILL_INTERNAL_KEY env var. Deducts from host user found\n  via game_participation record.",
+        "operationId": "bill_quarter_games_histrategy_bill_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Internal-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Internal-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/histrategy/credit-check": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Credit Check",
+        "description": "Check if the host user has sufficient credits for another turn.\n\nCalled by histrategy BEFORE resolving a turn.\nTwo auth paths:\n- Internal key (server-to-server): X-Internal-Key header\n- JWT (frontend): via Authorization header",
+        "operationId": "credit_check_games_histrategy_credit_check_get",
+        "parameters": [
+          {
+            "name": "room_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Room Id"
+            }
+          },
+          {
+            "name": "X-Internal-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Internal-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/histrategy/balance": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Get Balance",
+        "description": "Get the host user's credit balance for display in the game lobby.\n\nCalled by histrategy for Lobby UI display.",
+        "operationId": "get_balance_games_histrategy_balance_get",
+        "parameters": [
+          {
+            "name": "room_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Room Id"
+            }
+          },
+          {
+            "name": "X-Internal-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Internal-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/histrategy/shared/{room_id}": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Get Shared Room",
+        "description": "Public spectate page \u2014 fetch room data from histrategy (no auth required).",
+        "operationId": "get_shared_room_games_histrategy_shared__room_id__get",
+        "parameters": [
+          {
+            "name": "room_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Room Id"
+            }
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Quarter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/histrategy/shared/session/{room_id}": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Get Shared Session Turns",
+        "description": "Public spectate \u2014 return all turns for a room. Only works if room is_public.",
+        "operationId": "get_shared_session_turns_games_histrategy_shared_session__room_id__get",
+        "parameters": [
+          {
+            "name": "room_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Room Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/histrategy/scenarios/{scenario_id}/characters": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Get Public Characters",
+        "description": "Public endpoint \u2014 return characters for a scenario (no auth required).",
+        "operationId": "get_public_characters_games_histrategy_scenarios__scenario_id__characters_get",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play/exobrain/chat": {
+      "post": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Chat",
+        "description": "Handle Exobrain chat \u2014 returns canned response for suggestions, else calls LLM.\n\nRequires Emergence API key (Bearer token) for SaaS mode.\nSuggestion IDs bypass the LLM entirely for instant, zero-cost responses.\nFalls back from agent-render proxy to direct DeepSeek call.",
+        "operationId": "exobrain_chat_api_play_exobrain_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExobrainChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/play/exobrain/documents": {
+      "get": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Documents",
+        "description": "Auth-gated proxy: list/create exobrain documents (scoped to the user).",
+        "operationId": "exobrain_documents_api_play_exobrain_documents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Documents",
+        "description": "Auth-gated proxy: list/create exobrain documents (scoped to the user).",
+        "operationId": "exobrain_documents_api_play_exobrain_documents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/play/exobrain/documents/{doc_id}": {
+      "get": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Document",
+        "description": "Auth-gated proxy: get/update/delete a single exobrain document (owner-only).",
+        "operationId": "exobrain_document_api_play_exobrain_documents__doc_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Document",
+        "description": "Auth-gated proxy: get/update/delete a single exobrain document (owner-only).",
+        "operationId": "exobrain_document_api_play_exobrain_documents__doc_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Document",
+        "description": "Auth-gated proxy: get/update/delete a single exobrain document (owner-only).",
+        "operationId": "exobrain_document_api_play_exobrain_documents__doc_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/play/exobrain/verify": {
+      "post": {
+        "tags": [
+          "Play"
+        ],
+        "summary": "Exobrain Verify",
+        "description": "Auth-gated proxy: SymPy verification of LaTeX equations.",
+        "operationId": "exobrain_verify_api_play_exobrain_verify_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/chat": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Chat",
+        "description": "Unified NL interface for agents and humans.\n\nAccepts natural language messages and returns platform-aware responses.\n- Anonymous users: FAQ, tool discovery, public bounty browsing\n- Authenticated users: + bounty draft generation\n\nExample: \"\u6211\u9700\u8981\u4e00\u4e2a\u628a CSV \u8f6c\u6210 LaTeX \u8868\u683c\u7684\u5de5\u5177\"\n-> The assistant drafts a bounty specification.",
+        "operationId": "chat_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/chat/health": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Chat Health",
+        "description": "Health check for the chat system.",
+        "operationId": "chat_health_chat_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Read Root",
@@ -2906,6 +4700,30 @@
   },
   "components": {
     "schemas": {
+      "AdminRefundRequest": {
+        "properties": {
+          "username_or_api_key": {
+            "type": "string",
+            "title": "Username Or Api Key"
+          },
+          "bounty_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Bounty Id"
+          },
+          "amount_credits": {
+            "type": "number",
+            "title": "Amount Credits",
+            "default": 0.001
+          }
+        },
+        "type": "object",
+        "required": [
+          "username_or_api_key",
+          "bounty_id"
+        ],
+        "title": "AdminRefundRequest"
+      },
       "AgentProfileCreate": {
         "properties": {
           "display_name": {
@@ -3133,6 +4951,243 @@
         "title": "AgentProfileUpdate",
         "description": "Same fields, all optional. Used for PATCH."
       },
+      "AgentRegistrationRequest": {
+        "properties": {
+          "creator_handle": {
+            "type": "string",
+            "title": "Creator Handle"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": "General"
+          },
+          "endpoint_url": {
+            "type": "string",
+            "title": "Endpoint Url"
+          },
+          "skill_manifest_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skill Manifest Url"
+          },
+          "price_micro_credits": {
+            "type": "integer",
+            "title": "Price Micro Credits",
+            "default": 10000
+          },
+          "input_schema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Schema"
+          },
+          "output_schema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Schema"
+          },
+          "is_certified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Certified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "creator_handle",
+          "slug",
+          "display_name",
+          "endpoint_url"
+        ],
+        "title": "AgentRegistrationRequest",
+        "description": "Schema for third-party agent certification onboarding (e.g. KSCP, community builders).\n\nWorkflow:\n1. Creator POSTs here with their agent manifest.\n2. Platform creates AgentMarketplaceItem with is_certified=False (pending review),\n   or is_certified=True if creator is an operator / 'emergencescience'.\n3. Hermes pings the endpoint_url with a challenge to verify liveness.\n4. Operator approves via PATCH /agents/{creator}/{slug} \u2192 is_certified=True."
+      },
+      "AgentUpdateRequest": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "endpoint_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint Url"
+          },
+          "skill_manifest_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skill Manifest Url"
+          },
+          "price_micro_credits": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Micro Credits"
+          },
+          "input_schema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Schema"
+          },
+          "output_schema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Schema"
+          },
+          "is_certified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Certified"
+          },
+          "pote_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pote Score"
+          }
+        },
+        "type": "object",
+        "title": "AgentUpdateRequest",
+        "description": "Partial update for agent profile (used by creator or platform operator)."
+      },
       "ArticleCreate": {
         "properties": {
           "title": {
@@ -3232,6 +5287,29 @@
           "post"
         ],
         "title": "ArticleType"
+      },
+      "BillRequest": {
+        "properties": {
+          "room_id": {
+            "type": "string",
+            "title": "Room Id"
+          },
+          "quarter_number": {
+            "type": "integer",
+            "title": "Quarter Number"
+          },
+          "total_tokens": {
+            "type": "integer",
+            "title": "Total Tokens"
+          }
+        },
+        "type": "object",
+        "required": [
+          "room_id",
+          "quarter_number",
+          "total_tokens"
+        ],
+        "title": "BillRequest"
       },
       "Body_proxy_extract_document_tools_data_extract_post": {
         "properties": {
@@ -3525,6 +5603,42 @@
         ],
         "title": "BountyStatus"
       },
+      "ChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ChatRequest"
+      },
       "DraftRequest": {
         "properties": {
           "template_id": {
@@ -3550,6 +5664,62 @@
           "template_id"
         ],
         "title": "DraftRequest"
+      },
+      "ExobrainChatRequest": {
+        "properties": {
+          "messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": "deepseek-v4-flash"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments"
+          },
+          "suggestion_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "ExobrainChatRequest"
       },
       "HTTPValidationError": {
         "properties": {
@@ -4100,6 +6270,29 @@
         ],
         "title": "PPTGenerateResult"
       },
+      "ParticipationRequest": {
+        "properties": {
+          "room_id": {
+            "type": "string",
+            "title": "Room Id"
+          },
+          "faction_id": {
+            "type": "string",
+            "title": "Faction Id",
+            "default": ""
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": "player"
+          }
+        },
+        "type": "object",
+        "required": [
+          "room_id"
+        ],
+        "title": "ParticipationRequest"
+      },
       "ProgrammingLanguage": {
         "type": "string",
         "enum": [
@@ -4110,7 +6303,8 @@
           "typescript",
           "text",
           "llm",
-          "vlm"
+          "vlm",
+          "json"
         ],
         "title": "ProgrammingLanguage"
       },
@@ -4151,7 +6345,8 @@
           "d2",
           "graphviz",
           "tikz",
-          "plantuml"
+          "plantuml",
+          "sympy"
         ],
         "title": "RenderEngine"
       },
