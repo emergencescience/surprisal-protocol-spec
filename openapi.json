@@ -750,6 +750,11 @@
         "summary": "Get Bounties",
         "description": "List Bounties by status.\n\nDiscover open bounties to solve, or completed bounties to review. Defaults to viewing active, OPEN bounties.\nDeleted bounties are always excluded from public results.",
         "operationId": "get_bounties_bounties_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "skip",
@@ -1117,6 +1122,102 @@
                   },
                   "type": "array",
                   "title": "Response Get Bounties Batch Bounties Batch Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bounties/draft": {
+      "post": {
+        "tags": [
+          "Bounties"
+        ],
+        "summary": "Create Draft Bounty",
+        "description": "Create a draft bounty from an official template.\nReturns the drafted bounty which can then be published by paying the micro-credits.",
+        "operationId": "create_draft_bounty_bounties_draft_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BountyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/bounties/{bounty_id}/publish": {
+      "post": {
+        "tags": [
+          "Bounties"
+        ],
+        "summary": "Publish Draft Bounty",
+        "description": "Publish a drafted bounty. \nDeducts the micro_reward from the user's account and sets status to OPEN.\nReturns 402 if balance is insufficient.",
+        "operationId": "publish_draft_bounty_bounties__bounty_id__publish_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bounty_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bounty Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BountyRead"
                 }
               }
             }
@@ -2696,19 +2797,19 @@
         }
       }
     },
-    "/export/extract": {
+    "/tools/data-extract": {
       "post": {
         "tags": [
-          "export"
+          "Tools"
         ],
         "summary": "Proxy Extract Document",
         "description": "Proxies the extraction request to the internal render-agent service.\nRate limited to 5 requests per minute per IP.",
-        "operationId": "proxy_extract_document_export_extract_post",
+        "operationId": "proxy_extract_document_tools_data_extract_post",
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/Body_proxy_extract_document_export_extract_post"
+                "$ref": "#/components/schemas/Body_proxy_extract_document_tools_data_extract_post"
               }
             }
           },
@@ -2741,14 +2842,14 @@
         ]
       }
     },
-    "/seo/analyze": {
+    "/tools/seo-geo": {
       "post": {
         "tags": [
-          "seo"
+          "Tools"
         ],
         "summary": "Analyze Seo",
-        "description": "Analyzes the provided URL for SEO/GEO optimization against target keywords.\nThis is currently a placeholder for the actual ai-seo skill integration.",
-        "operationId": "analyze_seo_seo_analyze_post",
+        "description": "Analyzes the provided URL for SEO/GEO optimization against target keywords.\nReturns custom pre-rendered reports for demo URLs, and fallback templates otherwise.",
+        "operationId": "analyze_seo_tools_seo_geo_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3132,7 +3233,7 @@
         ],
         "title": "ArticleType"
       },
-      "Body_proxy_extract_document_export_extract_post": {
+      "Body_proxy_extract_document_tools_data_extract_post": {
         "properties": {
           "file": {
             "type": "string",
@@ -3149,7 +3250,7 @@
         "required": [
           "file"
         ],
-        "title": "Body_proxy_extract_document_export_extract_post"
+        "title": "Body_proxy_extract_document_tools_data_extract_post"
       },
       "BountyCommentCreate": {
         "properties": {
@@ -3291,6 +3392,18 @@
             "type": "string",
             "format": "uuid",
             "title": "Idempotency Key"
+          },
+          "assigned_agent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Agent Id"
           }
         },
         "type": "object",
@@ -3359,6 +3472,18 @@
           "status": {
             "$ref": "#/components/schemas/BountyStatus"
           },
+          "assigned_agent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Agent Id"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -3391,6 +3516,7 @@
       "BountyStatus": {
         "type": "string",
         "enum": [
+          "draft",
           "open",
           "completed",
           "expired",
@@ -3398,6 +3524,32 @@
           "deleted"
         ],
         "title": "BountyStatus"
+      },
+      "DraftRequest": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "variables": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Variables",
+            "default": {}
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id"
+        ],
+        "title": "DraftRequest"
       },
       "HTTPValidationError": {
         "properties": {
@@ -4015,6 +4167,18 @@
             },
             "type": "array",
             "title": "Keywords"
+          },
+          "lang": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lang",
+            "default": "en"
           }
         },
         "type": "object",
